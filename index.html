@@ -11,33 +11,34 @@
     <button class="theme-toggle" onclick="toggleMode()">Switch Theme</button>
     <button class="music-toggle" onclick="toggleMusic()">Mute Music</button>
     <label for="volume-slider">Volume</label>
-<input type="range" id="volume-slider" min="0" max="100" value="50" title="Adjust Music Volume">
-<span id="volume-value">50%</span>
-
+    <input type="range" id="volume-slider" min="0" max="100" value="50" title="Adjust Music Volume">
+    <span id="volume-value">50%</span>
 
     <h1>Countdown Until Parker Comes Home</h1>
     <div id="countdown"></div>
 
     <!-- YouTube Music Player (Using IFrame API) -->
-    <iframe id="yt-music" width="0" height="0"
-    src="https://www.youtube.com/embed/videoseries?list=VLPLjZAnkcmUbK6e8GCvmnjrMTkgpdLm_1OX&autoplay=1&loop=1&mute=1"
-    allow="autoplay"
-    title="YouTube Music Playlist">
-</iframe>
-
-
-    
-    </div>
+    <div id="yt-music"></div>
 
     <script>
         function toggleMode() {
             document.body.classList.toggle('light-mode');
         }
 
-        // 🚀 YouTube IFrame API for Volume Control
+        // 🚀 YouTube IFrame API for Music Control
         let ytPlayer;
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-music', {
+                height: '0',
+                width: '0',
+                videoId: '',
+                playerVars: {
+                    'listType': 'playlist',
+                    'list': 'VLPLjZAnkcmUbK6e8GCvmnjrMTkgpdLm_1OX', // Your playlist ID
+                    'autoplay': 1,
+                    'loop': 1,
+                    'mute': 1
+                },
                 events: {
                     'onReady': onPlayerReady
                 }
@@ -45,15 +46,14 @@
         }
 
         function onPlayerReady(event) {
-    let volumeSlider = document.getElementById("volume-slider");
-    let volumeValue = document.getElementById("volume-value");
+            let volumeSlider = document.getElementById("volume-slider");
+            let volumeValue = document.getElementById("volume-value");
 
-    volumeSlider.addEventListener("input", function () {
-        ytPlayer.setVolume(volumeSlider.value);
-        volumeValue.innerText = volumeSlider.value + "%"; // Update the displayed value
-    });
-}
-
+            volumeSlider.addEventListener("input", function () {
+                ytPlayer.setVolume(volumeSlider.value);
+                volumeValue.innerText = volumeSlider.value + "%"; // Display volume %
+            });
+        }
 
         function toggleMusic() {
             if (ytPlayer.isMuted()) {
@@ -63,7 +63,7 @@
             }
         }
 
-        // 🚀 YouTube API Script (Loads Player Controls)
+        // 🚀 Load YouTube API
         let script = document.createElement("script");
         script.src = "https://www.youtube.com/iframe_api";
         document.body.appendChild(script);
@@ -120,14 +120,13 @@
         setInterval(createFloatingMessage, 3000);
 
         async function fetchGitHubImages() {
-        // 🚀 Load Floating Images from GitHub
-        let images = [
-            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
-            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
-            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
-            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
-        ];
-
+            // 🚀 Load Floating Images from GitHub
+            let images = [
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
+            ];
 
             images.forEach(imageUrl => {
                 let img = document.createElement("img");
