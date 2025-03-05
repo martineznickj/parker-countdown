@@ -9,28 +9,63 @@
 </head>
 <body>
     <button class="theme-toggle" onclick="toggleMode()">Switch Theme</button>
-    <button class="music-toggle" onclick="toggleMusic()">Unmute Music</button>
+    <button class="music-toggle" onclick="toggleMusic()">Mute Music</button>
+    <label for="volume-slider">Volume</label>
+<input type="range" id="volume-slider" min="0" max="100" value="50" title="Adjust Music Volume">
+<span id="volume-value">50%</span>
+
 
     <h1>Countdown Until Parker Comes Home</h1>
     <div id="countdown"></div>
 
-    <!-- YouTube Music Playlist -->
+    <!-- YouTube Music Player (Using IFrame API) -->
     <iframe id="yt-music" width="0" height="0"
-        src="https://www.youtube.com/embed/videoseries?list=PL1234567890ABCDEFG&autoplay=1&loop=1&mute=1"
-        allow="autoplay">
-    </iframe>
+    src="https://www.youtube.com/embed/videoseries?list=VLPLjZAnkcmUbK6e8GCvmnjrMTkgpdLm_1OX&enablejsapi=1&autoplay=1&loop=1&mute=1"
+    allow="autoplay"
+    title="YouTube Music Playlist for Background Audio">
+</iframe>
+
+    
+    </div>
 
     <script>
         function toggleMode() {
             document.body.classList.toggle('light-mode');
         }
 
-        function toggleMusic() {
-            let iframe = document.getElementById("yt-music");
-            iframe.src = iframe.src.includes("mute=1") 
-                ? iframe.src.replace("mute=1", "mute=0") 
-                : iframe.src.replace("mute=0", "mute=1");
+        // 🚀 YouTube IFrame API for Volume Control
+        let ytPlayer;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-music', {
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
         }
+
+        function onPlayerReady(event) {
+    let volumeSlider = document.getElementById("volume-slider");
+    let volumeValue = document.getElementById("volume-value");
+
+    volumeSlider.addEventListener("input", function () {
+        ytPlayer.setVolume(volumeSlider.value);
+        volumeValue.innerText = volumeSlider.value + "%"; // Update the displayed value
+    });
+}
+
+
+        function toggleMusic() {
+            if (ytPlayer.isMuted()) {
+                ytPlayer.unMute();
+            } else {
+                ytPlayer.mute();
+            }
+        }
+
+        // 🚀 YouTube API Script (Loads Player Controls)
+        let script = document.createElement("script");
+        script.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(script);
 
         let targetDate = new Date("July 1, 2025 00:00:00").getTime();
 
@@ -54,7 +89,6 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // 🚀 Fetch Messages from messages.json
         async function fetchMessages() {
             try {
                 let response = await fetch("messages.json");
@@ -84,6 +118,7 @@
 
         setInterval(createFloatingMessage, 3000);
 
+        async function fetchGitHubImages() {
         // 🚀 Load Floating Images from GitHub
         let images = [
             "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
@@ -92,7 +127,7 @@
             "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
         ];
 
-        function displayImages() {
+
             images.forEach(imageUrl => {
                 let img = document.createElement("img");
                 img.classList.add("floating-image");
@@ -106,7 +141,7 @@
             });
         }
 
-        setInterval(displayImages, 6000);
+        setInterval(fetchGitHubImages, 6000);
     </script>
 </body>
 </html>
