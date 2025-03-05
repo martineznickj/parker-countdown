@@ -1,140 +1,77 @@
-/* 🌙 Default Dark Mode */
-:root {
-    --bg-dark: #082d08;
-    --text-dark: white;
-    --countdown-dark: rgba(255, 0, 0, 0.8);
-    --bg-light: #f0f5f0;
-    --text-light: black;
-    --countdown-light: rgba(0, 128, 0, 0.8);
-}
-
-/* 🌎 Global Styles */
+/* 🌙 Default Dark Mode (Night Theme) */
 body {
     font-family: 'Poppins', sans-serif;
     text-align: center;
-    background-color: var(--bg-dark);
-    color: var(--text-dark);
-    transition: background 0.5s, color 0.5s ease-in-out;
-    overflow: hidden;
-    position: relative;
+    background-color: #082d08; /* Deep Green */
+    color: #ff4d4d; /* Red Accent */
+    transition: background 1s ease-in-out; /* Slower background transition */
 }
 
-/* ☀ Light Mode */
-.light-mode {
-    background-color: var(--bg-light);
-    color: var(--text-light);
+/* ☀ Light Mode (Day Theme) */
+.night-mode {
+    background-color: #1a1a2e; /* Dark Blue-Green */
+    color: #ffcc00; /* Yellow-Gold Accent */
 }
 
-/* 📌 Header Text - Placed Above Timer */
+/* 🏆 Header - Parker's Favorite Colors */
 #main-title {
     font-size: 2rem;
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    width: 100%;
-    max-width: 90%;
     font-weight: bold;
-    z-index: 101; /* Ensures it's always above the timer */
+    color: #ff4d4d; /* Red */
+    text-shadow: 3px 3px 5px rgba(255, 77, 77, 0.8);
 }
 
-/* ⏳ Countdown Timer - Centered Below Title */
+/* ⏳ Countdown Timer - Green Theme */
 #countdown {
     font-family: 'Press Start 2P', cursive;
     font-size: 3rem;
-    background: var(--countdown-dark);
+    background: rgba(0, 128, 0, 0.8); /* Green */
     padding: 20px 40px;
     border-radius: 15px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    max-width: 80%;
+    display: inline-block;
     text-align: center;
+    box-shadow: 0px 0px 15px rgba(0, 255, 0, 0.6);
+    animation: glowEffect 4s infinite alternate; /* Slower glow effect */
 }
 
 /* ☀ Light Mode Countdown */
-.light-mode #countdown {
-    background: var(--countdown-light);
+.night-mode #countdown {
+    background: rgba(255, 77, 77, 0.9); /* Red */
+    box-shadow: 0px 0px 15px rgba(255, 77, 77, 0.6);
 }
 
-/* 🎉 Celebration Mode */
-.celebration-mode {
-    background: url('https://source.unsplash.com/1920x1080/?fireworks,celebration') no-repeat center center/cover;
-    color: yellow;
-    text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.9);
+/* ✨ Slower Glow Effect for Countdown */
+@keyframes glowEffect {
+    0% { box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.6); }
+    100% { box-shadow: 0px 0px 20px rgba(0, 255, 0, 1); }
 }
 
-/* 🏆 No Overlapping Elements */
-#celebration-message, .floating-message {
-    z-index: 90;
-}
-
-/* 🎊 Celebration Message */
-#celebration-message {
-    font-size: 2rem;
-    font-weight: bold;
-    display: none;
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.3);
-    padding: 20px;
-    border-radius: 15px;
-    color: white;
-    text-shadow: 0px 0px 10px black;
-    z-index: 99;
-}
-
-/* 🎊 Confetti Effect */
-#confetti {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 50;
-}
-
-.confetti-piece {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: rgba(255, 0, 0, 0.8);
-    opacity: 0.9;
-    border-radius: 50%;
-    animation: fall linear infinite;
-}
-
-@keyframes fall {
-    0% { transform: translateY(-100vh) rotate(0deg); }
-    100% { transform: translateY(100vh) rotate(360deg); }
-}
-
-/* ✨ Floating Messages */
+/* 🎊 Floating Messages - Move Up Slower */
 .floating-message {
     position: absolute;
     font-size: 1.8rem;
     font-weight: bold;
-    color: rgba(255, 255, 255, 0.8);
+    color: white;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
-    opacity: 0;
-    animation: floatUp 6s ease-in-out infinite;
-    z-index: 50;
+    opacity: 1;
+    animation: floatUp 12s ease-in-out infinite; /* Slower */
 }
 
-/* ✨ Floating Text Animation */
+/* 🚀 Floating Images - Move Up Slower */
+.floating-image {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    opacity: 0.8;
+    animation: floatUp 15s linear infinite; /* Slower */
+}
+
+/* 🎭 Slower Floating Up Animation */
 @keyframes floatUp {
-    0% { opacity: 0; transform: translateY(50px) scale(0.5); }
-    50% { opacity: 1; transform: translateY(0px) scale(1); }
-    100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100vh); opacity: 0; }
 }
 
 /* 🎛 Theme Toggle Button */
@@ -143,27 +80,22 @@ body {
     top: 20px;
     right: 20px;
     padding: 10px 15px;
-    font-size: 1rem;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #4caf50;
+    background-color: #4caf50; /* Green */
     color: white;
-    transition: background 0.3s ease-in-out;
-    z-index: 100;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0px 0px 8px rgba(0, 255, 0, 0.6);
 }
 
 /* 📱 Mobile Optimization */
 @media (max-width: 768px) {
     #main-title {
         font-size: 1.5rem;
-        top: 35%;
     }
 
     #countdown {
         font-size: 2rem;
         padding: 10px 20px;
-        max-width: 90%;
     }
 
     .floating-message {
@@ -172,7 +104,12 @@ body {
         bottom: 10%;
     }
 
-    button {
+    .floating-image {
+        width: 80px;
+        height: 80px;
+    }
+
+    .theme-toggle {
         font-size: 0.9rem;
         padding: 8px 16px;
     }

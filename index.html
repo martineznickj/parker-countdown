@@ -11,6 +11,7 @@
     <button class="theme-toggle" onclick="toggleMode()">Switch Theme</button>
 
     <h1 id="main-title">Countdown Until Parker Comes Home</h1>
+
     <div id="countdown"></div>
 
     <div id="celebration-message">🎉 Welcome Home, Parker! 🎊</div>
@@ -41,7 +42,6 @@
             document.getElementById("countdown").style.display = "none";
             document.getElementById("main-title").innerHTML = "🎉 Parker is Home!! 🎉";
             document.getElementById("celebration-message").style.display = "block";
-            startConfetti();
         }
 
         function exitCelebrationMode() {
@@ -49,7 +49,6 @@
             document.getElementById("countdown").style.display = "block";
             document.getElementById("main-title").innerHTML = "Countdown Until Parker Comes Home";
             document.getElementById("celebration-message").style.display = "none";
-            stopConfetti();
         }
 
         function updateCountdown() {
@@ -75,24 +74,12 @@
             document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
         }
 
-        function startConfetti() {
-            let confettiContainer = document.createElement("div");
-            confettiContainer.id = "confetti";
-            document.body.appendChild(confettiContainer);
-
-            for (let i = 0; i < 100; i++) {
-                let confettiPiece = document.createElement("div");
-                confettiPiece.classList.add("confetti-piece");
-                confettiPiece.style.left = `${Math.random() * 100}vw`;
-                confettiPiece.style.animationDuration = `${Math.random() * 3 + 2}s`;
-                confettiContainer.appendChild(confettiPiece);
-            }
-        }
-
-        function stopConfetti() {
-            let confettiContainer = document.getElementById("confetti");
-            if (confettiContainer) {
-                confettiContainer.remove();
+        function toggleMode() {
+            let hour = new Date().getHours();
+            if (hour >= 6 && hour < 18) {
+                document.body.classList.remove('night-mode');
+            } else {
+                document.body.classList.add('night-mode');
             }
         }
 
@@ -120,18 +107,35 @@
             document.body.appendChild(message);
 
             message.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
-            message.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+            message.style.bottom = "0px";
 
             setTimeout(() => { message.remove(); }, 6000);
         }
 
-        function toggleMode() {
-            document.body.classList.toggle('light-mode');
+        function createFloatingImage() {
+            let images = [
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
+                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
+            ];
+
+            let img = document.createElement("img");
+            img.classList.add("floating-image");
+            img.src = images[Math.floor(Math.random() * images.length)];
+            document.body.appendChild(img);
+
+            img.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+            img.style.bottom = "0px";
+
+            setTimeout(() => { img.remove(); }, 8000);
         }
 
         setInterval(createFloatingMessage, 3000);
+        setInterval(createFloatingImage, 5000);
         setInterval(updateCountdown, 1000);
         updateCountdown();
+        toggleMode();
     </script>
 </body>
 </html>
