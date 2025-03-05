@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Until Parker Comes Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #082d08;
+            --text-dark: white;
+            --countdown-dark: rgba(255, 0, 0, 0.8);
+            --bg-light: #f0f5f0;
+            --text-light: black;
+            --countdown-light: rgba(0, 128, 0, 0.8);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+            transition: background 0.5s, color 0.5s;
+        }
+
+        .light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        #countdown {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 3rem;
+            background: var(--countdown-dark);
+            padding: 15px 30px;
+            border-radius: 15px;
+        }
+
+        .light-mode #countdown {
+            background: var(--countdown-light);
+        }
+
+        .floating-message {
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            opacity: 0;
+            animation: floatUp 6s ease-in-out infinite;
+        }
+
+        .floating-image {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            opacity: 0.8;
+            animation: floatImage 8s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="toggleMode()">Switch Theme</button>
+
+    <h1>Countdown Until Parker Comes Home</h1>
+    <div id="countdown"></div>
+
+    <script>
+        function toggleMode() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        let targetDate = new Date("July 1, 2025 00:00:00").getTime();
+
+        function updateCountdown() {
+            let now = new Date().getTime();
+            let difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.getElementById("countdown").innerHTML = "Parker is home!";
+                return;
+            }
+
+            let days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>
