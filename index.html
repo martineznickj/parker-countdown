@@ -20,6 +20,7 @@
             text-align: center;
             background-color: var(--bg-dark);
             color: var(--text-dark);
+            overflow: hidden;
             transition: background 0.5s, color 0.5s;
         }
 
@@ -42,7 +43,8 @@
 
         .floating-message {
             position: absolute;
-            font-size: 2rem;
+            font-size: 1.8rem;
+            font-weight: bold;
             color: rgba(255, 255, 255, 0.8);
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
             background: rgba(0, 0, 0, 0.3);
@@ -59,10 +61,31 @@
             opacity: 0.8;
             animation: floatImage 8s ease-in-out infinite;
         }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(50px) scale(0.5); }
+            50% { opacity: 1; transform: translateY(0px) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+        }
+
+        @keyframes floatImage {
+            0% { opacity: 0; transform: translateY(100px) scale(0.8); }
+            50% { opacity: 1; transform: translateY(0px) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
+        }
     </style>
 </head>
 <body>
-    <button onclick="toggleMode()">Switch Theme</button>
+    <button class="theme-toggle" onclick="toggleMode()">Switch Theme</button>
 
     <h1>Countdown Until Parker Comes Home</h1>
     <div id="countdown"></div>
@@ -93,6 +116,60 @@
 
         setInterval(updateCountdown, 1000);
         updateCountdown();
+
+        // 🚀 Fetch Messages from messages.json
+        async function fetchMessages() {
+            try {
+                let response = await fetch("messages.json");
+                let data = await response.json();
+                return data.messages;
+            } catch (error) {
+                console.error("Error loading messages:", error);
+                return [];
+            }
+        }
+
+        async function createFloatingMessage() {
+            let messages = await fetchMessages();
+            if (messages.length === 0) return;
+
+            let messageText = messages[Math.floor(Math.random() * messages.length)];
+            let message = document.createElement("div");
+            message.classList.add("floating-message");
+            message.innerText = messageText;
+            document.body.appendChild(message);
+
+            message.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+            message.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+
+            setTimeout(() => { message.remove(); }, 6000);
+        }
+
+        setInterval(createFloatingMessage, 3000);
+
+        // 🚀 Load Floating Images from GitHub
+        let images = [
+            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
+            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
+            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
+            "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
+        ];
+
+        function displayImages() {
+            images.forEach(imageUrl => {
+                let img = document.createElement("img");
+                img.classList.add("floating-image");
+                img.src = imageUrl;
+                document.body.appendChild(img);
+
+                img.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+                img.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+
+                setTimeout(() => { img.remove(); }, 8000);
+            });
+        }
+
+        setInterval(displayImages, 6000);
     </script>
 </body>
 </html>
