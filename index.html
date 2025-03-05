@@ -27,6 +27,15 @@
             return parkerHomeStart;
         }
 
+        function isParkerHome() {
+            let now = new Date().getTime();
+            let parkerHomeDate = getNextParkerVisitDate();
+            let parkerLeavesDate = new Date(parkerHomeDate);
+            parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
+
+            return now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime();
+        }
+
         function enterCelebrationMode() {
             document.body.classList.add("celebration-mode");
             document.getElementById("countdown").style.display = "none";
@@ -87,56 +96,18 @@
             }
         }
 
-    function getNextParkerVisitDate() {
-        let today = new Date();
-        let parkerHomeStart = new Date("July 1, 2025 00:00:00");
+        async function fetchMessages() {
+            let messageFile = isParkerHome() ? "messages-home.json" : "messages-away.json";
 
-        while (parkerHomeStart < today) {
-            parkerHomeStart.setMonth(parkerHomeStart.getMonth() + 4);
+            try {
+                let response = await fetch(messageFile);
+                let data = await response.json();
+                return data.messages;
+            } catch (error) {
+                console.error("Error loading messages:", error);
+                return [];
+            }
         }
-
-        return parkerHomeStart;
-    }
-
-    function isParkerHome() {
-        let now = new Date().getTime();
-        let parkerHomeDate = getNextParkerVisitDate();
-        let parkerLeavesDate = new Date(parkerHomeDate);
-        parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
-
-        return now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime();
-    }
-
-    async function fetchMessages() {
-        let messageFile = isParkerHome() ? "messages-home.json" : "messages-away.json";
-
-        try {
-            let response = await fetch(messageFile);
-            let data = await response.json();
-            return data.messages;
-        } catch (error) {
-            console.error("Error loading messages:", error);
-            return [];
-        }
-    }
-
-    async function createFloatingMessage() {
-        let messages = await fetchMessages();
-        if (messages.length === 0) return;
-
-        let messageText = messages[Math.floor(Math.random() * messages.length)];
-        let message = document.createElement("div");
-        message.classList.add("floating-message");
-        message.innerText = messageText;
-        document.body.appendChild(message);
-
-        message.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
-        message.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
-
-        setTimeout(() => { message.remove(); }, 6000);
-    }
-
-    setInterval(createFloatingMessage, 3000);
 
         async function createFloatingMessage() {
             let messages = await fetchMessages();
@@ -152,6 +123,10 @@
             message.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
 
             setTimeout(() => { message.remove(); }, 6000);
+        }
+
+        function toggleMode() {
+            document.body.classList.toggle('light-mode');
         }
 
         setInterval(createFloatingMessage, 3000);
