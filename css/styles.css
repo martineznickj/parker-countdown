@@ -1,3 +1,4 @@
+/* Default: Dark Mode */
 :root {
     --bg-dark: #082d08;
     --text-dark: white;
@@ -7,70 +8,57 @@
     --countdown-light: rgba(0, 128, 0, 0.8);
 }
 
+/* Global Styles */
 body {
     font-family: 'Poppins', sans-serif;
     text-align: center;
     background-color: var(--bg-dark);
     color: var(--text-dark);
-    overflow: hidden;
-    transition: background 0.5s, color 0.5s;
+    transition: background 0.5s, color 0.5s ease-in-out;
 }
 
+/* Light Mode */
 .light-mode {
     background-color: var(--bg-light);
     color: var(--text-light);
 }
 
+/* Countdown Timer */
 #countdown {
     font-family: 'Press Start 2P', cursive;
     font-size: 3rem;
-    background: var(--countdown-dark);
-    padding: 15px 30px;
-    border-radius: 15px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
 }
 
-.light-mode #countdown {
-    background: var(--countdown-light);
+/* 🎉 Celebration Mode */
+.celebration-mode {
+    background: url('https://source.unsplash.com/1920x1080/?fireworks,celebration') no-repeat center center/cover;
+    color: yellow;
 }
 
+/* Celebration Message */
+#celebration-message {
+    font-size: 2rem;
+    display: none;
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Floating Messages */
 .floating-message {
     position: absolute;
     font-size: 1.8rem;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border-radius: 8px;
-    opacity: 0;
     animation: floatUp 6s ease-in-out infinite;
-}
-
-.floating-image {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    opacity: 0.8;
-    animation: floatImage 8s ease-in-out infinite;
-}
-
-.theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 1rem;
 }
 
 @keyframes floatUp {
     0% { opacity: 0; transform: translateY(50px) scale(0.5); }
     50% { opacity: 1; transform: translateY(0px) scale(1); }
     100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
-}
-
-@keyframes floatImage {
-    0% { opacity: 0; transform: translateY(100px) scale(0.8); }
-    50% { opacity: 1; transform: translateY(0px) scale(1); }
-    100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
 }

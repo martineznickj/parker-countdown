@@ -9,74 +9,53 @@
 </head>
 <body>
     <button class="theme-toggle" onclick="toggleMode()">Switch Theme</button>
-    <button class="music-toggle" onclick="toggleMusic()">Mute Music</button>
-    <label for="volume-slider">Volume</label>
-    <input type="range" id="volume-slider" min="0" max="100" value="50" title="Adjust Music Volume">
-    <span id="volume-value">50%</span>
 
-    <h1>Countdown Until Parker Comes Home</h1>
+    <h1 id="main-title">Countdown Until Parker Comes Home</h1>
     <div id="countdown"></div>
 
-    <!-- YouTube Music Player (Using IFrame API) -->
-    <div id="yt-music"></div>
+    <div id="celebration-message">🎉 Welcome Home, Parker! 🎊</div>
 
     <script>
-        function toggleMode() {
-            document.body.classList.toggle('light-mode');
-        }
+        function getNextParkerVisitDate() {
+            let today = new Date();
+            let parkerHomeStart = new Date("July 1, 2025 00:00:00");
 
-        // 🚀 YouTube IFrame API for Music Control
-        let ytPlayer;
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-music', {
-                height: '0',
-                width: '0',
-                videoId: '',
-                playerVars: {
-                    'listType': 'playlist',
-                    'list': 'VLPLjZAnkcmUbK6e8GCvmnjrMTkgpdLm_1OX', // Your playlist ID
-                    'autoplay': 1,
-                    'loop': 1,
-                    'mute': 1
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            let volumeSlider = document.getElementById("volume-slider");
-            let volumeValue = document.getElementById("volume-value");
-
-            volumeSlider.addEventListener("input", function () {
-                ytPlayer.setVolume(volumeSlider.value);
-                volumeValue.innerText = volumeSlider.value + "%"; // Display volume %
-            });
-        }
-
-        function toggleMusic() {
-            if (ytPlayer.isMuted()) {
-                ytPlayer.unMute();
-            } else {
-                ytPlayer.mute();
+            while (parkerHomeStart < today) {
+                parkerHomeStart.setMonth(parkerHomeStart.getMonth() + 4);
             }
+
+            return parkerHomeStart;
         }
 
-        // 🚀 Load YouTube API
-        let script = document.createElement("script");
-        script.src = "https://www.youtube.com/iframe_api";
-        document.body.appendChild(script);
+        function enterCelebrationMode() {
+            document.body.classList.add("celebration-mode");
+            document.getElementById("countdown").style.display = "none";
+            document.getElementById("main-title").innerHTML = "🎉 Parker is Home!! 🎉";
+            document.getElementById("celebration-message").style.display = "block";
+            startConfetti();
+        }
 
-        let targetDate = new Date("July 1, 2025 00:00:00").getTime();
+        function exitCelebrationMode() {
+            document.body.classList.remove("celebration-mode");
+            document.getElementById("countdown").style.display = "block";
+            document.getElementById("main-title").innerHTML = "Countdown Until Parker Comes Home";
+            document.getElementById("celebration-message").style.display = "none";
+            stopConfetti();
+        }
 
         function updateCountdown() {
             let now = new Date().getTime();
-            let difference = targetDate - now;
+            let parkerHomeDate = getNextParkerVisitDate();
+            let difference = parkerHomeDate - now;
 
-            if (difference <= 0) {
-                document.getElementById("countdown").innerHTML = "Parker is home!";
+            let parkerLeavesDate = new Date(parkerHomeDate);
+            parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
+
+            if (now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime()) {
+                enterCelebrationMode();
                 return;
+            } else {
+                exitCelebrationMode();
             }
 
             let days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -87,19 +66,77 @@
             document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
         }
 
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+        function startConfetti() {
+            let confettiContainer = document.createElement("div");
+            confettiContainer.id = "confetti";
+            document.body.appendChild(confettiContainer);
 
-        async function fetchMessages() {
-            try {
-                let response = await fetch("messages.json");
-                let data = await response.json();
-                return data.messages;
-            } catch (error) {
-                console.error("Error loading messages:", error);
-                return [];
+            for (let i = 0; i < 100; i++) {
+                let confettiPiece = document.createElement("div");
+                confettiPiece.classList.add("confetti-piece");
+                confettiPiece.style.left = `${Math.random() * 100}vw`;
+                confettiPiece.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confettiContainer.appendChild(confettiPiece);
             }
         }
+
+        function stopConfetti() {
+            let confettiContainer = document.getElementById("confetti");
+            if (confettiContainer) {
+                confettiContainer.remove();
+            }
+        }
+
+    function getNextParkerVisitDate() {
+        let today = new Date();
+        let parkerHomeStart = new Date("July 1, 2025 00:00:00");
+
+        while (parkerHomeStart < today) {
+            parkerHomeStart.setMonth(parkerHomeStart.getMonth() + 4);
+        }
+
+        return parkerHomeStart;
+    }
+
+    function isParkerHome() {
+        let now = new Date().getTime();
+        let parkerHomeDate = getNextParkerVisitDate();
+        let parkerLeavesDate = new Date(parkerHomeDate);
+        parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
+
+        return now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime();
+    }
+
+    async function fetchMessages() {
+        let messageFile = isParkerHome() ? "messages-home.json" : "messages-away.json";
+
+        try {
+            let response = await fetch(messageFile);
+            let data = await response.json();
+            return data.messages;
+        } catch (error) {
+            console.error("Error loading messages:", error);
+            return [];
+        }
+    }
+
+    async function createFloatingMessage() {
+        let messages = await fetchMessages();
+        if (messages.length === 0) return;
+
+        let messageText = messages[Math.floor(Math.random() * messages.length)];
+        let message = document.createElement("div");
+        message.classList.add("floating-message");
+        message.innerText = messageText;
+        document.body.appendChild(message);
+
+        message.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
+        message.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+
+        setTimeout(() => { message.remove(); }, 6000);
+    }
+
+    setInterval(createFloatingMessage, 3000);
 
         async function createFloatingMessage() {
             let messages = await fetchMessages();
@@ -118,30 +155,8 @@
         }
 
         setInterval(createFloatingMessage, 3000);
-
-        async function fetchGitHubImages() {
-            // 🚀 Load Floating Images from GitHub
-            let images = [
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg"
-            ];
-
-            images.forEach(imageUrl => {
-                let img = document.createElement("img");
-                img.classList.add("floating-image");
-                img.src = imageUrl;
-                document.body.appendChild(img);
-
-                img.style.left = `${Math.random() * (window.innerWidth - 100)}px`;
-                img.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
-
-                setTimeout(() => { img.remove(); }, 8000);
-            });
-        }
-
-        setInterval(fetchGitHubImages, 6000);
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
     </script>
 </body>
 </html>
