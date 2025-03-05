@@ -4,7 +4,9 @@ body {
     text-align: center;
     background-color: #082d08; /* Deep Green */
     color: #ff4d4d; /* Red Accent */
-    transition: background 1s ease-in-out; /* Slower background transition */
+    transition: background 1s ease-in-out;
+    overflow: hidden;
+    position: relative;
 }
 
 /* ☀ Light Mode (Day Theme) */
@@ -15,10 +17,11 @@ body {
 
 /* 🏆 Header - Parker's Favorite Colors */
 #main-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: #ff4d4d; /* Red */
     text-shadow: 3px 3px 5px rgba(255, 77, 77, 0.8);
+    margin-top: 2%;
 }
 
 /* ⏳ Countdown Timer - Green Theme */
@@ -31,7 +34,7 @@ body {
     display: inline-block;
     text-align: center;
     box-shadow: 0px 0px 15px rgba(0, 255, 0, 0.6);
-    animation: glowEffect 4s infinite alternate; /* Slower glow effect */
+    margin: 5% auto;
 }
 
 /* ☀ Light Mode Countdown */
@@ -40,38 +43,40 @@ body {
     box-shadow: 0px 0px 15px rgba(255, 77, 77, 0.6);
 }
 
-/* ✨ Slower Glow Effect for Countdown */
+/* ✨ Countdown Glow Effect */
 @keyframes glowEffect {
     0% { box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.6); }
     100% { box-shadow: 0px 0px 20px rgba(0, 255, 0, 1); }
 }
 
-/* 🎊 Floating Messages - Move Up Slower */
+/* 🎊 Floating Messages - Move Up Slowly */
 .floating-message {
     position: absolute;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: white;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
     padding: 10px;
     border-radius: 8px;
     opacity: 1;
-    animation: floatUp 12s ease-in-out infinite; /* Slower */
+    animation: floatUp 15s ease-in-out infinite;
+    max-width: 80%;
+    text-align: center;
 }
 
-/* 🚀 Floating Images - Move Up Slower */
+/* 🚀 Floating Images - Move Up */
 .floating-image {
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     opacity: 0.8;
-    animation: floatUp 15s linear infinite; /* Slower */
+    animation: floatUp 18s linear infinite;
 }
 
-/* 🎭 Slower Floating Up Animation */
+/* 🎭 Floating Up Animation */
 @keyframes floatUp {
     0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-100vh); opacity: 0; }
+    100% { transform: translateY(-120vh); opacity: 0; }
 }
 
 /* 🎛 Theme Toggle Button */
@@ -79,29 +84,85 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    padding: 10px 15px;
+    padding: 12px 20px;
     background-color: #4caf50; /* Green */
     color: white;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 1.2rem;
     box-shadow: 0px 0px 8px rgba(0, 255, 0, 0.6);
 }
 
 /* 📱 Mobile Optimization */
+@media (max-width: 1024px) {
+    #main-title {
+        font-size: 2rem;
+        margin-top: 5%;
+    }
+
+    #countdown {
+        font-size: 2.5rem;
+        padding: 15px 30px;
+        max-width: 90%;
+    }
+
+    .floating-message {
+        font-size: 1.3rem;
+        padding: 8px;
+    }
+
+    .floating-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .theme-toggle {
+        font-size: 1rem;
+        padding: 10px 16px;
+    }
+}
+
 @media (max-width: 768px) {
     #main-title {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
+        margin-top: 6%;
     }
 
     #countdown {
         font-size: 2rem;
-        padding: 10px 20px;
+        padding: 12px 25px;
+        max-width: 95%;
     }
 
     .floating-message {
+        font-size: 1.2rem;
+    }
+
+    .floating-image {
+        width: 90px;
+        height: 90px;
+    }
+
+    .theme-toggle {
+        font-size: 0.9rem;
+        padding: 8px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    #main-title {
         font-size: 1.5rem;
-        top: auto;
-        bottom: 10%;
+        margin-top: 8%;
+    }
+
+    #countdown {
+        font-size: 1.8rem;
+        padding: 10px 20px;
+        max-width: 98%;
+    }
+
+    .floating-message {
+        font-size: 1rem;
     }
 
     .floating-image {
@@ -110,7 +171,7 @@ body {
     }
 
     .theme-toggle {
-        font-size: 0.9rem;
-        padding: 8px 16px;
+        font-size: 0.8rem;
+        padding: 6px 12px;
     }
 }
