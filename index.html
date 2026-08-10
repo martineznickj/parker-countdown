@@ -83,7 +83,11 @@
             <button class="close-btn" onclick="closeGame()">✕ Close</button>
         </div>
         <canvas id="game-canvas"></canvas>
-        <div id="game-score"></div>
+        <div id="game-bar">
+            <button id="game-restart" onclick="restartGame()">🔄</button>
+            <span id="game-score"></span>
+            <button id="game-back" onclick="backToMenu()">✕</button>
+        </div>
         <div id="game-controls">
             <div id="game-controls-inner">
                 <button id="btn-up">▲</button>
@@ -632,7 +636,7 @@
         function startGame(game) {
             gameMenu.style.display = 'none';
             gameCanvas.style.display = 'block';
-            gameScore.style.display = 'block';
+            document.getElementById('game-bar').style.display = 'flex';
             gameControls.style.display = 'flex';
             gameCanvas.width = 300;
             gameCanvas.height = 300;
@@ -640,6 +644,23 @@
             if (game === 'snake') initSnake();
             if (game === 'tetris') initTetris();
             if (game === 'frogger') initFrogger();
+        }
+
+        function restartGame() {
+            if (currentGame === 'snake') initSnake();
+            if (currentGame === 'tetris') initTetris();
+            if (currentGame === 'frogger') initFrogger();
+        }
+
+        function backToMenu() {
+            gameMenu.style.display = 'block';
+            gameCanvas.style.display = 'none';
+            document.getElementById('game-bar').style.display = 'none';
+            gameScore.style.display = 'none';
+            gameControls.style.display = 'none';
+            currentGame = null;
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = null;
         }
 
         // ═══════ SNAKE ═══════
