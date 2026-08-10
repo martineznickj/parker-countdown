@@ -165,7 +165,7 @@ body {
     position: relative;
     width: 100%;
     max-width: 500px;
-    height: 350px;
+    height: min(350px, 50vh);
     margin: 0 auto;
     border-radius: 20px;
     overflow: hidden;
@@ -187,7 +187,8 @@ body {
 .carousel-item img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    background: rgba(0,0,0,0.05);
 }
 
 /* Daily message */
