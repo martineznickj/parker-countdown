@@ -691,10 +691,29 @@
         function drawSnake() {
             const gs = gameState, c = gs.cellSize;
             gameCtx.clearRect(0,0,300,300);
+            // Board background
+            gameCtx.fillStyle = '#1a1a2e';
+            gameCtx.fillRect(0,0,300,300);
+            // Grid lines
+            gameCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+            gameCtx.lineWidth = 0.5;
+            for (let i=0;i<=20;i++) { gameCtx.beginPath(); gameCtx.moveTo(i*c,0); gameCtx.lineTo(i*c,300); gameCtx.stroke(); }
+            for (let i=0;i<=20;i++) { gameCtx.beginPath(); gameCtx.moveTo(0,i*c); gameCtx.lineTo(300,i*c); gameCtx.stroke(); }
+            // Boundary frame
+            gameCtx.strokeStyle = '#ff5252';
+            gameCtx.lineWidth = 3;
+            gameCtx.strokeRect(0,0,300,300);
+            // Snake
             gameCtx.fillStyle = '#4caf50';
-            gs.snake.forEach(s => gameCtx.fillRect(s.x*c, s.y*c, c-1, c-1));
+            gs.snake.forEach(s => gameCtx.fillRect(s.x*c+1, s.y*c+1, c-2, c-2));
+            // Head
+            gameCtx.fillStyle = '#81c784';
+            gameCtx.fillRect(gs.snake[0].x*c+2, gs.snake[0].y*c+2, c-4, c-4);
+            // Food
             gameCtx.fillStyle = '#ff5252';
-            gameCtx.fillRect(gs.food.x*c, gs.food.y*c, c-1, c-1);
+            gameCtx.beginPath();
+            gameCtx.arc(gs.food.x*c+c/2, gs.food.y*c+c/2, c/2-2, 0, Math.PI*2);
+            gameCtx.fill();
         }
 
         // ═══════ TETRIS ═══════
@@ -764,10 +783,24 @@
         function drawTetris() {
             const gs = gameState, c = gs.cellSize;
             gameCtx.clearRect(0,0,300,300);
+            // Background
+            gameCtx.fillStyle = '#1a1a2e';
+            gameCtx.fillRect(0,0,300,300);
+            // Grid
+            gameCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+            gameCtx.lineWidth = 0.5;
+            for (let y=0;y<=20;y++) { gameCtx.beginPath(); gameCtx.moveTo(0,y*c); gameCtx.lineTo(150,y*c); gameCtx.stroke(); }
+            for (let x=0;x<=10;x++) { gameCtx.beginPath(); gameCtx.moveTo(x*c,0); gameCtx.lineTo(x*c,300); gameCtx.stroke(); }
+            // Boundary frame
+            gameCtx.strokeStyle = '#ff9800';
+            gameCtx.lineWidth = 3;
+            gameCtx.strokeRect(0,0,150,300);
+            // Placed pieces
             for (let y=0;y<20;y++) for (let x=0;x<10;x++)
-                if (gs.board[y][x]) { gameCtx.fillStyle=gs.board[y][x]; gameCtx.fillRect(x*c,y*c,c-1,c-1); }
+                if (gs.board[y][x]) { gameCtx.fillStyle=gs.board[y][x]; gameCtx.fillRect(x*c+1,y*c+1,c-2,c-2); }
+            // Current piece
             gameCtx.fillStyle=gs.pieceColor;
-            gs.piece.forEach((r,y)=>r.forEach((v,x)=>{ if(v) gameCtx.fillRect((gs.px+x)*c,(gs.py+y)*c,c-1,c-1); }));
+            gs.piece.forEach((r,y)=>r.forEach((v,x)=>{ if(v) gameCtx.fillRect((gs.px+x)*c+1,(gs.py+y)*c+1,c-2,c-2); }));
         }
 
         // ═══════ FROGGER ═══════
@@ -810,20 +843,40 @@
         function drawFrogger() {
             const gs = gameState, c = 20;
             gameCtx.clearRect(0,0,300,300);
-            // Water (top)
-            gameCtx.fillStyle = '#2196f3'; gameCtx.fillRect(0,0,300,40);
-            // Goal
-            gameCtx.fillStyle = '#4caf50'; gameCtx.fillRect(0,0,300,20);
+            // Sky
+            gameCtx.fillStyle = '#1a237e'; gameCtx.fillRect(0,0,300,300);
+            // Goal zone
+            gameCtx.fillStyle = '#2e7d32'; gameCtx.fillRect(0,0,300,c);
+            // River
+            gameCtx.fillStyle = '#1565c0'; gameCtx.fillRect(0,c,300,c);
             // Road
-            gameCtx.fillStyle = '#555'; gameCtx.fillRect(0,40,300,240);
+            gameCtx.fillStyle = '#424242'; gameCtx.fillRect(0,c*2,300,c*12);
+            // Lane dividers
+            gameCtx.strokeStyle = '#ffeb3b';
+            gameCtx.lineWidth = 1;
+            gameCtx.setLineDash([8,12]);
+            for (let y=2;y<14;y++) {
+                gameCtx.beginPath();
+                gameCtx.moveTo(0,y*c); gameCtx.lineTo(300,y*c);
+                gameCtx.stroke();
+            }
+            gameCtx.setLineDash([]);
+            // Boundary frame
+            gameCtx.strokeStyle = '#81d4fa';
+            gameCtx.lineWidth = 3;
+            gameCtx.strokeRect(0,0,300,300);
             // Cars
             gs.lanes.forEach(lane=>lane.forEach(car=>{
-                gameCtx.fillStyle = ['#ff5252','#ff8a65','#ffd54f','#ce93d8'][car.y%4];
-                gameCtx.fillRect(car.x*c,car.y*c,18,18);
+                gameCtx.fillStyle = ['#ff5252','#ff8a65','#ffd54f','#ce93d8','#4fc3f7','#aed581'][car.y%6];
+                gameCtx.fillRect(Math.floor(car.x*c),Math.floor(car.y*c)+2,c-2,c-4);
+                // Windshield
+                gameCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                gameCtx.fillRect(Math.floor(car.x*c)+4,Math.floor(car.y*c)+5,10,8);
             }));
             // Frog
-            gameCtx.fillStyle = '#4caf50'; gameCtx.font = '20px serif';
-            gameCtx.fillText('🐸', gs.frog.x*c, gs.frog.y*c+18);
+            gameCtx.font = '18px serif'; gameCtx.textAlign = 'center';
+            gameCtx.fillText('🐸', gs.frog.x*c+10, gs.frog.y*c+15);
+            gameCtx.textAlign = 'start';
         }
 
         // ═══════════════════════════════════════════════
