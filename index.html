@@ -70,6 +70,28 @@
     <!-- Random floating memories -->
     <div id="floating-layer"></div>
 
+    <!-- Easter egg game launcher -->
+    <div id="game-launcher" title="Games! 🎮">🎮</div>
+    
+    <!-- Game modal -->
+    <div id="game-modal">
+        <div id="game-menu">
+            <h2>🎮 Pick a Game</h2>
+            <button onclick="startGame('snake')">🐍 Snake</button>
+            <button onclick="startGame('tetris')">🧱 Tetris</button>
+            <button onclick="startGame('frogger')">🐸 Frogger</button>
+            <button class="close-btn" onclick="closeGame()">✕ Close</button>
+        </div>
+        <canvas id="game-canvas"></canvas>
+        <div id="game-score"></div>
+        <div id="game-controls">
+            <button id="btn-up">▲</button>
+            <button id="btn-left">◀</button>
+            <button id="btn-right">▶</button>
+            <button id="btn-down">▼</button>
+        </div>
+    </div>
+
     <script>
         // ═══════════════════════════════════════════════
         // SCHEDULE — Parker 4-month rotation
@@ -524,6 +546,258 @@
                 confettiCtx.restore();
             }
             confettiId = requestAnimationFrame(animateConfetti);
+        }
+
+        // ═══════════════════════════════════════════════
+        // EASTER EGG GAMES
+        // ═══════════════════════════════════════════════
+        const gameLauncher = document.getElementById('game-launcher');
+        const gameModal = document.getElementById('game-modal');
+        const gameCanvas = document.getElementById('game-canvas');
+        const gameCtx = gameCanvas.getContext('2d');
+        const gameScore = document.getElementById('game-score');
+        const gameMenu = document.getElementById('game-menu');
+        const gameControls = document.getElementById('game-controls');
+        
+        let gameLoop = null;
+        let currentGame = null;
+        let gameState = {};
+
+        gameLauncher.addEventListener('click', () => {
+            gameModal.style.display = 'flex';
+            gameMenu.style.display = 'block';
+            gameCanvas.style.display = 'none';
+            gameScore.style.display = 'none';
+            gameControls.style.display = 'none';
+            if (gameLoop) clearInterval(gameLoop);
+        });
+
+        function closeGame() {
+            gameModal.style.display = 'none';
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = null;
+        }
+
+        // Mobile D-pad
+        ['btn-up','btn-left','btn-right','btn-down'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                if (!currentGame) return;
+                const dirs = {'btn-up':'up','btn-down':'down','btn-left':'left','btn-right':'right'};
+                handleGameInput(dirs[id]);
+            });
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (!currentGame) return;
+            const map = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
+                         w:'up',s:'down',a:'left',d:'right'};
+            if (map[e.key]) { e.preventDefault(); handleGameInput(map[e.key]); }
+        });
+
+        function handleGameInput(dir) {
+            if (currentGame === 'snake') snakeInput(dir);
+            if (currentGame === 'tetris') tetrisInput(dir);
+            if (currentGame === 'frogger') froggerInput(dir);
+        }
+
+        function startGame(game) {
+            gameMenu.style.display = 'none';
+            gameCanvas.style.display = 'block';
+            gameScore.style.display = 'block';
+            gameControls.style.display = 'flex';
+            gameCanvas.width = 300;
+            gameCanvas.height = 300;
+            currentGame = game;
+            if (game === 'snake') initSnake();
+            if (game === 'tetris') initTetris();
+            if (game === 'frogger') initFrogger();
+        }
+
+        // ═══════ SNAKE ═══════
+        function initSnake() {
+            const gs = gameState;
+            gs.snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+            gs.dir = 'right'; gs.nextDir = 'right';
+            gs.food = spawnSnakeFood();
+            gs.score = 0; gs.cellSize = 15;
+            gameScore.textContent = '🐍 Score: 0';
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(snakeTick, 120);
+        }
+
+        function spawnSnakeFood() {
+            const gs = gameState;
+            let f;
+            do { f = {x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}; }
+            while (gs.snake.some(s => s.x===f.x && s.y===f.y));
+            return f;
+        }
+
+        function snakeInput(dir) {
+            const gs = gameState;
+            const opp = {up:'down',down:'up',left:'right',right:'left'};
+            if (dir !== opp[gs.dir]) gs.nextDir = dir;
+        }
+
+        function snakeTick() {
+            const gs = gameState;
+            gs.dir = gs.nextDir;
+            const head = {...gs.snake[0]};
+            if (gs.dir==='up') head.y--; if (gs.dir==='down') head.y++;
+            if (gs.dir==='left') head.x--; if (gs.dir==='right') head.x++;
+            
+            if (head.x<0 || head.x>=20 || head.y<0 || head.y>=20 ||
+                gs.snake.some(s => s.x===head.x && s.y===head.y)) {
+                gameScore.textContent = `🐍 Game Over! Score: ${gs.score}`;
+                clearInterval(gameLoop); gameLoop = null; return;
+            }
+            
+            gs.snake.unshift(head);
+            if (head.x===gs.food.x && head.y===gs.food.y) {
+                gs.score += 10; gs.food = spawnSnakeFood();
+                gameScore.textContent = `🐍 Score: ${gs.score}`;
+            } else { gs.snake.pop(); }
+            
+            drawSnake();
+        }
+
+        function drawSnake() {
+            const gs = gameState, c = gs.cellSize;
+            gameCtx.clearRect(0,0,300,300);
+            gameCtx.fillStyle = '#4caf50';
+            gs.snake.forEach(s => gameCtx.fillRect(s.x*c, s.y*c, c-1, c-1));
+            gameCtx.fillStyle = '#ff5252';
+            gameCtx.fillRect(gs.food.x*c, gs.food.y*c, c-1, c-1);
+        }
+
+        // ═══════ TETRIS ═══════
+        const TETRIS_PIECES = [
+            [[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]],
+            [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]]
+        ];
+        const TETRIS_COLORS = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ce93d8','#ff8a65','#81c784'];
+
+        function initTetris() {
+            const gs = gameState;
+            gs.board = Array(20).fill().map(()=>Array(10).fill(0));
+            gs.score = 0; gs.cellSize = 15;
+            spawnTetrisPiece();
+            gameScore.textContent = '🧱 Score: 0';
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(tetrisTick, 400);
+        }
+
+        function spawnTetrisPiece() {
+            const gs = gameState;
+            const idx = Math.floor(Math.random()*TETRIS_PIECES.length);
+            gs.piece = TETRIS_PIECES[idx].map(r=>[...r]);
+            gs.pieceColor = TETRIS_COLORS[idx];
+            gs.px = 3; gs.py = 0;
+            if (collidesTetris()) { gameScore.textContent = `🧱 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; }
+        }
+
+        function collidesTetris() {
+            const gs = gameState, p = gs.piece;
+            for (let y=0;y<p.length;y++) for (let x=0;x<p[y].length;x++)
+                if (p[y][x] && (gs.px+x<0||gs.px+x>=10||gs.py+y>=20||gs.board[gs.py+y]?.[gs.px+x])) return true;
+            return false;
+        }
+
+        function tetrisInput(dir) {
+            const gs = gameState;
+            if (dir==='left') { gs.px--; if (collidesTetris()) gs.px++; }
+            if (dir==='right') { gs.px++; if (collidesTetris()) gs.px--; }
+            if (dir==='down') { gs.py++; if (collidesTetris()) { gs.py--; lockTetris(); } }
+            if (dir==='up') {
+                const rotated = gs.piece[0].map((_,i)=>gs.piece.map(r=>r[i]).reverse());
+                const old = gs.piece; gs.piece = rotated;
+                if (collidesTetris()) gs.piece = old;
+            }
+            drawTetris();
+        }
+
+        function tetrisTick() {
+            const gs = gameState;
+            gs.py++;
+            if (collidesTetris()) { gs.py--; lockTetris(); }
+            drawTetris();
+        }
+
+        function lockTetris() {
+            const gs = gameState;
+            for (let y=0;y<gs.piece.length;y++) for (let x=0;x<gs.piece[y].length;x++)
+                if (gs.piece[y][x]) { if (gs.py+y<0) { return initTetris(); } gs.board[gs.py+y][gs.px+x]=gs.pieceColor; }
+            
+            let cleared = 0;
+            for (let y=19;y>=0;y--) if (gs.board[y].every(c=>c)) { gs.board.splice(y,1); gs.board.unshift(Array(10).fill(0)); cleared++; y++; }
+            if (cleared) { gs.score += cleared*100; gameScore.textContent = `🧱 Score: ${gs.score}`; }
+            spawnTetrisPiece();
+        }
+
+        function drawTetris() {
+            const gs = gameState, c = gs.cellSize;
+            gameCtx.clearRect(0,0,300,300);
+            for (let y=0;y<20;y++) for (let x=0;x<10;x++)
+                if (gs.board[y][x]) { gameCtx.fillStyle=gs.board[y][x]; gameCtx.fillRect(x*c,y*c,c-1,c-1); }
+            gameCtx.fillStyle=gs.pieceColor;
+            gs.piece.forEach((r,y)=>r.forEach((v,x)=>{ if(v) gameCtx.fillRect((gs.px+x)*c,(gs.py+y)*c,c-1,c-1); }));
+        }
+
+        // ═══════ FROGGER ═══════
+        function initFrogger() {
+            const gs = gameState;
+            gs.frog = {x:5,y:13}; gs.score = 0;
+            gs.lanes = [];
+            for (let y=1;y<13;y++) {
+                const speed = 0.5+Math.random()*1.5, dir = Math.random()>0.5?1:-1;
+                gs.lanes.push(Array(3).fill().map(()=>({x:Math.floor(Math.random()*15),y,speed,dir})));
+            }
+            gameScore.textContent = '🐸 Score: 0';
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(froggerTick, 200);
+        }
+
+        function froggerInput(dir) {
+            const gs = gameState, f = gs.frog;
+            if (dir==='up') f.y--; if (dir==='down') f.y++;
+            if (dir==='left') f.x--; if (dir==='right') f.x++;
+            if (f.x<0||f.x>=15||f.y<0||f.y>13) { gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; return; }
+            if (f.y===0) { gs.score+=100; gs.frog={x:5,y:13}; gameScore.textContent=`🐸 You made it! Score: ${gs.score}`; }
+            drawFrogger();
+        }
+
+        function froggerTick() {
+            const gs = gameState;
+            gs.lanes.forEach(lane=>lane.forEach(car=>{
+                car.x+=car.speed*car.dir*0.3;
+                if (car.x>15) car.x=-1; if (car.x<-1) car.x=15;
+            }));
+            // Check collision
+            for (let lane of gs.lanes) for (let car of lane)
+                if (Math.abs(car.x-gs.frog.x)<0.8 && car.y===gs.frog.y) {
+                    gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; return;
+                }
+            drawFrogger();
+        }
+
+        function drawFrogger() {
+            const gs = gameState, c = 20;
+            gameCtx.clearRect(0,0,300,300);
+            // Water (top)
+            gameCtx.fillStyle = '#2196f3'; gameCtx.fillRect(0,0,300,40);
+            // Goal
+            gameCtx.fillStyle = '#4caf50'; gameCtx.fillRect(0,0,300,20);
+            // Road
+            gameCtx.fillStyle = '#555'; gameCtx.fillRect(0,40,300,240);
+            // Cars
+            gs.lanes.forEach(lane=>lane.forEach(car=>{
+                gameCtx.fillStyle = ['#ff5252','#ff8a65','#ffd54f','#ce93d8'][car.y%4];
+                gameCtx.fillRect(car.x*c,car.y*c,18,18);
+            }));
+            // Frog
+            gameCtx.fillStyle = '#4caf50'; gameCtx.font = '20px serif';
+            gameCtx.fillText('🐸', gs.frog.x*c, gs.frog.y*c+18);
         }
 
         // ═══════════════════════════════════════════════
