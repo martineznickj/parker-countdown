@@ -467,35 +467,48 @@ body {
 #game-controls {
     display: none;
     position: relative;
-    width: 180px;
-    height: 180px;
-    margin-top: 5px;
+    width: 210px;
+    height: 210px;
+    margin-top: 8px;
 }
 
 #game-controls button {
     position: absolute;
-    width: 55px;
-    height: 55px;
-    font-size: 1.5rem;
-    border-radius: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.18);
+    width: 64px;
+    height: 64px;
+    font-size: 1.6rem;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.15);
     color: white;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, transform 0.1s;
 }
 
 #game-controls button:active { 
-    background: rgba(255,255,255,0.45); 
-    transform: scale(0.9);
+    background: rgba(255,255,255,0.5); 
+    transform: scale(0.85);
 }
 
-#btn-up    { top: 0; left: 62px; }
-#btn-down  { bottom: 0; left: 62px; }
-#btn-left  { top: 62px; left: 0; }
-#btn-right { top: 62px; right: 0; }
+#btn-up    { top: 0; left: 73px; }
+#btn-down  { bottom: 0; left: 73px; }
+#btn-left  { top: 73px; left: 0; }
+#btn-right { top: 73px; right: 0; }
+
+#btn-center {
+    top: 73px !important;
+    left: 73px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    font-size: 0.8rem !important;
+    pointer-events: none;
+}
 
 @media (min-width: 601px) {
     #game-controls { display: none !important; }
