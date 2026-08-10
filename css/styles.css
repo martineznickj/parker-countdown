@@ -287,6 +287,9 @@ body {
     animation: floatUp 22s linear;
     white-space: nowrap;
     z-index: 2;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 @keyframes floatUp {

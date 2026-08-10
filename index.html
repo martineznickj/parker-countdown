@@ -274,8 +274,14 @@
         // FLOATING MEMORIES
         // ═══════════════════════════════════════════════
         function createFloatingMemory() {
-            const memories = [
-                "Remember that time at the arcade? 🕹️", 
+            const isMobile = window.innerWidth < 600;
+            const memories = isMobile ? [
+                "Best hugs ever 🤗", "Epic game nights 🎮",
+                "Arcade champ! 🕹️", "Scout campout 🏕️",
+                "Pizza runs 🍕", "That laugh! 😂",
+                "Bike rides 🚲", "Minecraft builds ",
+            ] : [
+                "Remember that time at the arcade? 🕹️",
                 "Parker's famous laugh! 😂",
                 "Building forts in the living room 🏰",
                 "Late night pizza runs 🍕",
@@ -287,7 +293,7 @@
             const el = document.createElement('div');
             el.className = 'floating-memory';
             el.textContent = memories[Math.floor(Math.random() * memories.length)];
-            el.style.left = Math.random() * 80 + 10 + '%';
+            el.style.left = (isMobile ? Math.random() * 60 + 5 : Math.random() * 70 + 10) + '%';
             el.style.animationDuration = (12 + Math.random() * 10) + 's';
             document.getElementById('floating-layer').appendChild(el);
             setTimeout(() => el.remove(), 22000);
