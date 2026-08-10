@@ -1,77 +1,325 @@
-/* 🌙 Default Dark Mode */
+/* ═══════════════════════════════════════════════
+   PARKER COUNTDOWN — Styles
+   ═══════════════════════════════════════════════ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
     font-family: 'Poppins', sans-serif;
     text-align: center;
-    background-color: #082d08; /* Deep Green */
-    color: #ff4d4d; /* Red Accent */
-    transition: background 1s ease-in-out;
-    overflow: hidden;
+    min-height: 100vh;
+    transition: background 1.5s ease, color 1.5s ease;
+    overflow-x: hidden;
     position: relative;
 }
 
-/* ☀ Light Mode */
-.night-mode {
-    background-color: #1a1a2e; /* Dark Blue-Green */
-    color: #ffcc00; /* Yellow-Gold Accent */
+/* ── Canvas background ── */
+#particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
 }
 
-/* 🏆 Header */
+/* ── Container ── */
+.container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ═══════════════════════════════════════════════
+   SEASONAL THEMES
+   ═══════════════════════════════════════════════ */
+
+/* Spring — warm pinks/greens */
+.season-spring.day { background: linear-gradient(135deg, #e8f5e9 0%, #fce4ec 50%, #fff9c4 100%); color: #2e7d32; }
+.season-spring.night { background: linear-gradient(135deg, #1b2a1f 0%, #2d1b2e 50%, #1a237e 100%); color: #a5d6a7; }
+.season-spring .is-home .season-spring { background: linear-gradient(135deg, #c8e6c9 0%, #f8bbd0 100%); }
+
+/* Summer — bright/yellow */
+.season-summer.day { background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 50%, #fff176 100%); color: #e65100; }
+.season-summer.night { background: linear-gradient(135deg, #263238 0%, #1a237e 100%); color: #ffcc80; }
+.season-summer #countdown { background: rgba(255, 152, 0, 0.2); border: 3px solid #ff9800; }
+
+/* Fall — warm oranges/browns */
+.season-fall.day { background: linear-gradient(135deg, #fff3e0 0%, #fbe9e7 50%, #efebe9 100%); color: #bf360c; }
+.season-fall.night { background: linear-gradient(135deg, #3e2723 0%, #4e342e 100%); color: #ffab91; }
+.season-fall #countdown { background: rgba(255, 87, 34, 0.2); border: 3px solid #ff5722; }
+
+/* Winter — cool blues/whites */
+.season-winter.day { background: linear-gradient(135deg, #e3f2fd 0%, #eceff1 50%, #e8eaf6 100%); color: #1565c0; }
+.season-winter.night { background: linear-gradient(135deg, #0d1b2a 0%, #1a237e 100%); color: #90caf9; }
+.season-winter #countdown { background: rgba(33, 150, 243, 0.2); border: 3px solid #2196f3; }
+
+/* ── Home celebration override ── */
+.is-home.day { background: linear-gradient(135deg, #e8f5e9 0%, #fff9c4 50%, #c8e6c9 100%) !important; }
+.is-home.night { background: linear-gradient(135deg, #1b5e20 0%, #1a237e 100%) !important; }
+.is-home #countdown { display: none; }
+
+/* ═══════════════════════════════════════════════
+   COMPONENTS
+   ═══════════════════════════════════════════════ */
+
+/* Season badge */
+#season-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Title */
 #main-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #ff4d4d;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.5s ease;
+}
+.is-home #main-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 3.5rem;
+    animation: pulse 2s ease-in-out infinite;
 }
 
-/* ⏳ Countdown Timer */
+#subtitle {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+    font-style: italic;
+}
+
+/* Countdown */
+#countdown-wrapper {
+    margin: 20px 0 30px;
+}
+
 #countdown {
     font-family: 'Press Start 2P', cursive;
-    font-size: 3rem;
-    background: rgba(0, 128, 0, 0.8);
-    padding: 20px 40px;
-    border-radius: 15px;
+    font-size: 2.5rem;
+    padding: 25px 30px;
+    border-radius: 20px;
     display: inline-block;
-    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.5s ease;
 }
 
-/* 🎊 Floating Messages */
-.floating-message {
-    position: fixed;
-    bottom: -5%;
+#countdown span {
+    font-size: 3.5rem;
+    display: inline-block;
+    min-width: 70px;
+}
+
+#countdown small {
+    font-size: 1rem;
+    display: inline-block;
+    margin: 0 5px;
+    opacity: 0.7;
+}
+
+/* Progress bar */
+#progress-bar {
+    width: 80%;
+    max-width: 500px;
+    height: 8px;
+    margin: 15px auto 5px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+
+#progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: currentColor;
+    opacity: 0.6;
+    transition: width 1s ease;
+}
+
+#progress-label {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* Photo carousel */
+#photo-section {
+    margin: 40px 0 30px;
+}
+
+#photo-section h2 {
     font-size: 1.5rem;
-    color: white;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    animation: floatUp 15s linear infinite;
+    margin-bottom: 15px;
+    font-weight: 600;
 }
 
-/* 🚀 Floating Images (Larger Size) */
-.floating-image {
+#carousel {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: 350px;
+    margin: 0 auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.carousel-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
+.carousel-item.active {
+    opacity: 1;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Daily message */
+#message-container {
+    margin: 25px 0;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+}
+
+#daily-message {
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+#message-author {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.3rem;
+    margin-top: 5px;
+    opacity: 0.8;
+}
+
+/* Timeline */
+#timeline {
+    margin: 40px 0;
+}
+
+#timeline h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+#timeline-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.timeline-block {
+    padding: 15px 20px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.timeline-block.active {
+    border-color: currentColor;
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.timeline-block.home { border-color: rgba(76, 175, 80, 0.5); }
+.timeline-block.away { border-color: rgba(255, 152, 0, 0.5); }
+
+.block-label {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.block-dates {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.block-name {
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+/* Footer */
+#footer {
+    margin-top: 40px;
+    padding: 20px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+/* Floating memories */
+.floating-memory {
     position: fixed;
     bottom: -5%;
-    width: 300px; /* ~3 inches */
-    height: 500px; /* ~5 inches */
-    opacity: 0.9;
-    object-fit: cover; /* Ensures images fill without stretching */
-    animation: floatUp 18s linear infinite;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(5px);
+    animation: floatUp 22s linear;
+    white-space: nowrap;
+    z-index: 2;
 }
 
-/* 🎭 Floating Animation */
 @keyframes floatUp {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-120vh); opacity: 0; }
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    80% { opacity: 0.8; }
+    100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
 }
 
-/* 📱 Mobile Optimization */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+
 @media (max-width: 768px) {
-    .floating-image {
-        width: 200px; /* Scale down for smaller screens */
-        height: 350px;
-    }
+    #main-title { font-size: 1.8rem; }
+    .is-home #main-title { font-size: 2.5rem; }
+    #countdown { font-size: 1.2rem; padding: 15px 20px; }
+    #countdown span { font-size: 2rem; min-width: 45px; }
+    #countdown small { font-size: 0.7rem; }
+    #carousel { height: 250px; max-width: 100%; }
+    .timeline-block { min-width: 140px; padding: 10px 14px; }
+    #daily-message { font-size: 1.1rem; }
 }
 
 @media (max-width: 480px) {
-    .floating-image {
-        width: 150px;
-        height: 250px;
-    }
+    #main-title { font-size: 1.5rem; }
+    .is-home #main-title { font-size: 2rem; }
+    #countdown { font-size: 1rem; padding: 10px 15px; }
+    #countdown span { font-size: 1.5rem; min-width: 35px; }
+    #carousel { height: 200px; }
+    #season-badge { font-size: 0.8rem; }
 }

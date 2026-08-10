@@ -3,131 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown Until Parker Comes Home</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <title>Parker Comes Home — Countdown</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@300;400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-    <h1 id="main-title">Countdown Until Parker Comes Home</h1>
+    <!-- Background canvas for seasonal particles -->
+    <canvas id="particles"></canvas>
 
-    <div id="countdown"></div>
+    <!-- Main container -->
+    <div class="container">
+        
+        <!-- Season indicator -->
+        <div id="season-badge"></div>
 
-    <div id="celebration-message">🎉 Welcome Home, Parker! 🎊</div>
+        <!-- Main countdown -->
+        <h1 id="main-title"></h1>
+        <div id="subtitle"></div>
+        
+        <div id="countdown-wrapper">
+            <div id="countdown"></div>
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
+            <div id="progress-label"></div>
+        </div>
+
+        <!-- Photo carousel -->
+        <div id="photo-section">
+            <h2>📸 Parker Moments</h2>
+            <div id="carousel">
+                <div id="carousel-inner"></div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="message-container">
+            <div id="daily-message"></div>
+            <div id="message-author"></div>
+        </div>
+
+        <!-- Upcoming blocks -->
+        <div id="timeline">
+            <h2>📅 Up Next</h2>
+            <div id="timeline-blocks"></div>
+        </div>
+
+        <!-- Footer -->
+        <div id="footer">
+            Made with ❤️ by Dad
+        </div>
+    </div>
+
+    <!-- Random floating memories -->
+    <div id="floating-layer"></div>
 
     <script>
-        function getNextParkerVisitDate() {
-            let today = new Date();
-            let parkerHomeStart = new Date("July 1, 2025 00:00:00");
+        // ═══════════════════════════════════════════════
+        // SCHEDULE — Parker 4-month rotation
+        // ═══════════════════════════════════════════════
+        const BLOCKS = [
+            { start: "2026-03-01", end: "2026-07-01", location: "NV", label: "Spring in Vegas" },
+            { start: "2026-07-01", end: "2026-11-01", location: "GA", label: "Summer in Georgia" },
+            { start: "2026-11-01", end: "2027-03-01", location: "NV", label: "Holidays in Vegas" },
+            { start: "2027-03-01", end: "2027-07-01", location: "GA", label: "Spring in Georgia" },
+            { start: "2027-07-01", end: "2027-11-01", location: "NV", label: "Summer in Vegas" },
+            { start: "2027-11-01", end: "2028-03-01", location: "GA", label: "Holidays in Georgia" },
+        ];
 
-            while (parkerHomeStart < today) {
-                parkerHomeStart.setMonth(parkerHomeStart.getMonth() + 4);
+        // ═══════════════════════════════════════════════
+        // MESSAGES
+        // ═══════════════════════════════════════════════
+        const HOME_MESSAGES = [
+            "Parker, we missed you so much! ❤️",
+            "Welcome home, buddy! 🎉", 
+            "Time for adventures! 🚀",
+            "Dad's got something special planned! 😉",
+            "Movie night with snacks! 🍿🎬",
+            "Cherish every moment! ✨",
+            "Parker, you're the best! 😃",
+            "Family time is the best time! 🏡",
+            "Game night just got its MVP back! 🎮",
+            "The house feels whole again! 💙"
+        ];
+
+        const AWAY_MESSAGES = [
+            "We miss you, Parker! ❤️",
+            "Counting down the days! ⏳",
+            "Can't wait to see you again! 🎉",
+            "Stay awesome, Parker! 🤩",
+            "Home isn't the same without you! 🏡",
+            "Your laughter is missed every day! 😄",
+            "We have so many adventures planned! 🏕️",
+            "Hurry back, we need our Parker energy! ⚡",
+            "We're saving all the fun for you! 🎮",
+            "Your room is waiting for you! 🛏️",
+            "Just a little longer until Parker time! 🏆",
+            "We love you to the moon and back! 🌙🚀",
+            "Every day is one step closer! 👣",
+            "The countdown to hugs is on! 💕",
+            "We're so proud of you! 👏"
+        ];
+
+        // ═══════════════════════════════════════════════
+        // PHOTOS — use the existing images from the repo
+        // ═══════════════════════════════════════════════
+        const PHOTOS = [
+            "images/image1.jpg", "images/image2.jpg", "images/image3.jpg",
+            "images/image4.jpg", "images/image5.jpg", "images/image6.jpg",
+            "images/image7.jpg", "images/image8.jpg", "images/image9.jpg"
+        ];
+
+        // ═══════════════════════════════════════════════
+        // LOGIC
+        // ═══════════════════════════════════════════════
+        let currentBlock = null;
+        let nextHomeBlock = null;
+        let photoIndex = 0;
+        let messageIndex = 0;
+
+        function getCurrentBlock() {
+            const now = new Date();
+            for (let b of BLOCKS) {
+                const start = new Date(b.start + "T00:00:00-08:00");
+                const end = new Date(b.end + "T00:00:00-08:00");
+                if (now >= start && now < end) return b;
             }
-
-            return parkerHomeStart;
+            return BLOCKS[0]; // fallback
         }
 
-        function isParkerHome() {
-            let now = new Date().getTime();
-            let parkerHomeDate = getNextParkerVisitDate();
-            let parkerLeavesDate = new Date(parkerHomeDate);
-            parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
-
-            return now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime();
+        function getNextHomeBlock() {
+            const now = new Date();
+            for (let b of BLOCKS) {
+                if (b.location === "NV" && new Date(b.start + "T00:00:00-08:00") > now) {
+                    return b;
+                }
+            }
+            return BLOCKS.find(b => b.location === "NV");
         }
 
-        function enterCelebrationMode() {
-            document.body.classList.add("celebration-mode");
-            document.getElementById("countdown").style.display = "none";
-            document.getElementById("main-title").innerHTML = "🎉 Parker is Home!! 🎉";
-            document.getElementById("celebration-message").style.display = "block";
+        function isHome(location) {
+            return location === "NV";
         }
 
-        function exitCelebrationMode() {
-            document.body.classList.remove("celebration-mode");
-            document.getElementById("countdown").style.display = "block";
-            document.getElementById("main-title").innerHTML = "Countdown Until Parker Comes Home";
-            document.getElementById("celebration-message").style.display = "none";
+        function getSeason(month) {
+            if (month >= 3 && month <= 5) return "spring";
+            if (month >= 6 && month <= 8) return "summer";
+            if (month >= 9 && month <= 11) return "fall";
+            return "winter";
         }
 
-        function updateCountdown() {
-            let now = new Date().getTime();
-            let parkerHomeDate = getNextParkerVisitDate();
-            let difference = parkerHomeDate - now;
+        function getSeasonEmoji(season) {
+            return { spring: "🌸", summer: "☀️", fall: "🍂", winter: "❄️" }[season];
+        }
 
-            let parkerLeavesDate = new Date(parkerHomeDate);
-            parkerLeavesDate.setMonth(parkerLeavesDate.getMonth() + 4);
+        function getSeasonColor(season) {
+            return { 
+                spring: "#ff6b9d", 
+                summer: "#ffd54f", 
+                fall: "#ff8a65", 
+                winter: "#81d4fa" 
+            }[season];
+        }
 
-            if (now >= parkerHomeDate.getTime() && now < parkerLeavesDate.getTime()) {
-                enterCelebrationMode();
-                return;
+        // ═══════════════════════════════════════════════
+        // RENDER
+        // ═══════════════════════════════════════════════
+        function update() {
+            const now = new Date();
+            currentBlock = getCurrentBlock();
+            nextHomeBlock = getNextHomeBlock();
+            
+            const homeTarget = new Date(nextHomeBlock.start + "T00:00:00-08:00");
+            const blockStart = new Date(currentBlock.start + "T00:00:00-08:00");
+            const blockEnd = new Date(currentBlock.end + "T00:00:00-08:00");
+            
+            const diff = homeTarget - now;
+            const totalBlock = blockEnd - blockStart;
+            const elapsed = now - blockStart;
+            const progress = Math.min(100, Math.max(0, (elapsed / totalBlock) * 100));
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const season = getSeason(now.getMonth() + 1);
+            const home = isHome(currentBlock.location);
+
+            // Body class
+            document.body.className = '';
+            document.body.classList.add('season-' + season);
+            document.body.classList.add(home ? 'is-home' : 'is-away');
+            document.body.classList.add(now.getHours() >= 18 || now.getHours() < 6 ? 'night' : 'day');
+
+            // Season badge
+            document.getElementById('season-badge').textContent = 
+                getSeasonEmoji(season) + ' ' + season.charAt(0).toUpperCase() + season.slice(1);
+
+            // Title
+            if (home) {
+                document.getElementById('main-title').innerHTML = '🎉 Parker Is Home! 🎉';
+                document.getElementById('subtitle').textContent = currentBlock.label;
+                document.getElementById('countdown-wrapper').style.display = 'none';
             } else {
-                exitCelebrationMode();
+                document.getElementById('main-title').innerHTML = 'Parker Comes Home In...';
+                document.getElementById('subtitle').textContent = 
+                    `Currently: ${currentBlock.label} → Next: ${nextHomeBlock.label}`;
+                document.getElementById('countdown-wrapper').style.display = 'block';
+                document.getElementById('countdown').innerHTML = 
+                    `<span>${days}</span><small>d</small> <span>${hours}</span><small>h</small> <span>${minutes}</span><small>m</small> <span>${seconds}</span><small>s</small>`;
+                document.getElementById('progress-fill').style.width = progress.toFixed(1) + '%';
+                document.getElementById('progress-label').textContent = 
+                    `${progress.toFixed(0)}% through this block`;
             }
 
-            let days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            // Daily message
+            messageIndex = Math.floor(now / (1000 * 60 * 60)) % (home ? HOME_MESSAGES.length : AWAY_MESSAGES.length);
+            document.getElementById('daily-message').textContent = 
+                home ? HOME_MESSAGES[messageIndex] : AWAY_MESSAGES[messageIndex];
+            document.getElementById('message-author').textContent = '— Dad';
 
-            document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        function autoThemeSwitch() {
-            let hour = new Date().getHours();
-            if (hour >= 6 && hour < 18) {
-                document.body.classList.remove('night-mode');
-            } else {
-                document.body.classList.add('night-mode');
+            // Timeline
+            let timelineHTML = '';
+            for (let b of BLOCKS) {
+                const bStart = new Date(b.start + "T00:00:00-08:00");
+                if (bStart > now || b === currentBlock) {
+                    const active = b === currentBlock;
+                    const homeBlock = isHome(b.location);
+                    const label = homeBlock ? '🏠 Home in NV' : '✈️ Georgia';
+                    timelineHTML += `
+                        <div class="timeline-block ${active ? 'active' : ''} ${homeBlock ? 'home' : 'away'}">
+                            <div class="block-label">${label}</div>
+                            <div class="block-dates">${formatDate(b.start)} → ${formatDate(b.end)}</div>
+                            <div class="block-name">${b.label}</div>
+                        </div>`;
+                }
             }
+            document.getElementById('timeline-blocks').innerHTML = timelineHTML;
+
+            updateParticles(season, home, now);
         }
 
-        function createFloatingMessage() {
-            let messages = ["We miss you, Parker!", "Counting down the days!", "Can't wait to see you!", "Stay awesome, Parker!"];
-
-            let messageText = messages[Math.floor(Math.random() * messages.length)];
-            let message = document.createElement("div");
-            message.classList.add("floating-message");
-            message.innerText = messageText;
-            document.body.appendChild(message);
-
-            let randomLeft = Math.random() * (window.innerWidth - 100);
-            message.style.left = `${randomLeft}px`;
-            message.style.bottom = "-5%"; // Now starts BELOW the entire page
-
-            setTimeout(() => { message.remove(); }, 15000);
+        function formatDate(d) {
+            const date = new Date(d + "T00:00:00-08:00");
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
-        function createFloatingImage() {
-            let images = [
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image1.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image2.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image3.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image4.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image5.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image6.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image7.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image8.jpg",
-                "https://raw.githubusercontent.com/martineznickj/parker-countdown/main/images/image9.jpg"
+        // ═══════════════════════════════════════════════
+        // PHOTO CAROUSEL
+        // ═══════════════════════════════════════════════
+        function buildCarousel() {
+            const inner = document.getElementById('carousel-inner');
+            inner.innerHTML = PHOTOS.map((src, i) => 
+                `<div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <img src="${src}" alt="Parker" loading="lazy">
+                </div>`
+            ).join('');
+        }
+
+        function rotateCarousel() {
+            const items = document.querySelectorAll('.carousel-item');
+            items.forEach(item => item.classList.remove('active'));
+            photoIndex = (photoIndex + 1) % items.length;
+            items[photoIndex].classList.add('active');
+        }
+
+        // ═══════════════════════════════════════════════
+        // FLOATING MEMORIES
+        // ═══════════════════════════════════════════════
+        function createFloatingMemory() {
+            const memories = [
+                "Remember that time at the arcade? 🕹️", 
+                "Parker's famous laugh! 😂",
+                "Building forts in the living room 🏰",
+                "Late night pizza runs 🍕",
+                "Teaching Parker to ride a bike 🚲",
+                "Epic Minecraft sessions 🎮",
+                "The best hugs ever 🤗",
+                "Parker's first scout campout 🏕️",
             ];
-
-            let img = document.createElement("img");
-            img.classList.add("floating-image");
-            img.src = images[Math.floor(Math.random() * images.length)];
-            document.body.appendChild(img);
-
-            let randomLeft = Math.random() * (window.innerWidth - 100);
-            img.style.left = `${randomLeft}px`;
-            img.style.bottom = "-5%"; // Now starts BELOW the entire page
-
-            setTimeout(() => { img.remove(); }, 18000);
+            const el = document.createElement('div');
+            el.className = 'floating-memory';
+            el.textContent = memories[Math.floor(Math.random() * memories.length)];
+            el.style.left = Math.random() * 80 + 10 + '%';
+            el.style.animationDuration = (12 + Math.random() * 10) + 's';
+            document.getElementById('floating-layer').appendChild(el);
+            setTimeout(() => el.remove(), 22000);
         }
 
-        setInterval(createFloatingMessage, 5000);
-        setInterval(createFloatingImage, 8000);
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-        autoThemeSwitch();
+        // ═══════════════════════════════════════════════
+        // SEASONAL PARTICLES
+        // ═══════════════════════════════════════════════
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createParticles(season) {
+            particles = [];
+            const count = season === 'winter' ? 60 : 25;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: 2 + Math.random() * 6,
+                    speed: 0.3 + Math.random() * 1.5,
+                    wind: (Math.random() - 0.5) * 0.5,
+                    opacity: 0.3 + Math.random() * 0.7,
+                    wobble: Math.random() * Math.PI * 2,
+                    shape: season
+                });
+            }
+        }
+
+        function updateParticles(season, home, now) {
+            resizeCanvas();
+            if (particles.length === 0 || particles[0].shape !== season) {
+                createParticles(season);
+            }
+            drawParticles(season, home);
+        }
+
+        function drawParticles(season, home) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const baseColor = home ? 
+                { spring: '#ff6b9d', summer: '#ffd54f', fall: '#ff8a65', winter: '#e8eaf6' }[season] :
+                { spring: '#ce93d8', summer: '#ffcc80', fall: '#ffab91', winter: '#b0bec5' }[season];
+
+            for (let p of particles) {
+                p.y += p.speed;
+                p.x += p.wind + Math.sin(p.wobble + Date.now() * 0.001) * 0.3;
+                p.wobble += 0.02;
+                
+                if (p.y > canvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x > canvas.width + 20) p.x = -20;
+                if (p.x < -20) p.x = canvas.width + 20;
+
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = baseColor;
+                
+                if (season === 'winter') {
+                    // Snowflakes
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (season === 'fall') {
+                    // Leaves
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.wobble);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else if (season === 'spring') {
+                    // Petals
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.wobble);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size * 0.6, p.size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    // Summer — floating light specks
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════
+        window.addEventListener('resize', () => resizeCanvas());
+        buildCarousel();
+        setInterval(update, 1000);
+        setInterval(rotateCarousel, 4000);
+        setInterval(createFloatingMemory, 7000);
+        update();
+        createFloatingMemory();
     </script>
 </body>
 </html>
