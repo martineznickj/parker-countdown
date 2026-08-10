@@ -11,6 +11,9 @@
 
     <!-- Background canvas for seasonal particles -->
     <canvas id="particles"></canvas>
+    
+    <!-- Confetti canvas (home only) -->
+    <canvas id="confetti"></canvas>
 
     <!-- Main container -->
     <div class="container">
@@ -24,10 +27,18 @@
         
         <div id="countdown-wrapper">
             <div id="countdown"></div>
+            <!-- Progress bar -->
             <div id="progress-bar">
                 <div id="progress-fill"></div>
             </div>
             <div id="progress-label"></div>
+        
+            <!-- Where's Parker? -->
+            <div id="map-indicator">
+                <div id="nv-marker">🏠 Nevada</div>
+                <div id="map-line"></div>
+                <div id="ga-marker">🌳 Georgia</div>
+            </div>
         </div>
 
         <!-- Photo carousel -->
@@ -212,6 +223,8 @@
                 document.getElementById('main-title').innerHTML = '🎉 Parker Is Home! 🎉';
                 document.getElementById('subtitle').textContent = currentBlock.label;
                 document.getElementById('countdown-wrapper').style.display = 'none';
+                document.title = '🎉 Parker Is Home!';
+                startConfetti();
             } else {
                 document.getElementById('main-title').innerHTML = 'Parker Comes Home In...';
                 document.getElementById('subtitle').textContent = 
@@ -220,8 +233,24 @@
                 document.getElementById('countdown').innerHTML = 
                     `<span>${days}</span><small>d</small> <span>${hours}</span><small>h</small> <span>${minutes}</span><small>m</small> <span>${seconds}</span><small>s</small>`;
                 document.getElementById('progress-fill').style.width = progress.toFixed(1) + '%';
+                
+                // Days away counter
+                const daysAway = Math.floor(elapsed / (1000 * 60 * 60 * 24));
                 document.getElementById('progress-label').textContent = 
-                    `${progress.toFixed(0)}% through this block`;
+                    `Day ${daysAway + 1} away — ${progress.toFixed(0)}% through this block`;
+                
+                // Tab title countdown
+                document.title = `${days}d — Parker Comes Home`;
+                stopConfetti();
+            }
+            
+            // Map indicator
+            const nvMarker = document.getElementById('nv-marker');
+            const gaMarker = document.getElementById('ga-marker');
+            if (currentBlock.location === 'NV') {
+                nvMarker.classList.add('active'); gaMarker.classList.remove('active');
+            } else {
+                gaMarker.classList.add('active'); nvMarker.classList.remove('active');
             }
 
             // Daily message
@@ -395,9 +424,74 @@
         }
 
         // ═══════════════════════════════════════════════
+        // CONFETTI (home celebration)
+        // ═══════════════════════════════════════════════
+        const confettiCanvas = document.getElementById('confetti');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiPieces = [];
+        let confettiActive = false;
+        let confettiId = null;
+
+        function resizeConfetti() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+
+        function startConfetti() {
+            if (confettiActive) return;
+            confettiActive = true;
+            confettiCanvas.style.display = 'block';
+            resizeConfetti();
+            confettiPieces = [];
+            const colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff8a65','#ce93d8','#ffcc80','#81c784'];
+            for (let i = 0; i < 120; i++) {
+                confettiPieces.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height * -0.5,
+                    w: 5 + Math.random() * 12,
+                    h: 4 + Math.random() * 8,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: 1 + Math.random() * 3,
+                    drift: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 8
+                });
+            }
+            animateConfetti();
+        }
+
+        function stopConfetti() {
+            confettiActive = false;
+            confettiCanvas.style.display = 'none';
+            if (confettiId) cancelAnimationFrame(confettiId);
+            confettiPieces = [];
+        }
+
+        function animateConfetti() {
+            if (!confettiActive) return;
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let p of confettiPieces) {
+                p.y += p.speed;
+                p.x += p.drift;
+                p.rotation += p.rotSpeed;
+                if (p.y > confettiCanvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * confettiCanvas.width;
+                }
+                confettiCtx.save();
+                confettiCtx.translate(p.x, p.y);
+                confettiCtx.rotate(p.rotation * Math.PI / 180);
+                confettiCtx.fillStyle = p.color;
+                confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                confettiCtx.restore();
+            }
+            confettiId = requestAnimationFrame(animateConfetti);
+        }
+
+        // ═══════════════════════════════════════════════
         // INIT
         // ═══════════════════════════════════════════════
-        window.addEventListener('resize', () => resizeCanvas());
+        window.addEventListener('resize', () => { resizeCanvas(); resizeConfetti(); });
         buildCarousel();
         setInterval(update, 1000);
         setInterval(rotateCarousel, 4000);

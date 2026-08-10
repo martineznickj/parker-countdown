@@ -22,6 +22,15 @@ body {
     pointer-events: none;
 }
 
+#confetti {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    display: none;
+}
+
 /* ── Container ── */
 .container {
     position: relative;
@@ -148,6 +157,48 @@ body {
 #progress-label {
     font-size: 0.8rem;
     opacity: 0.6;
+    margin-top: 4px;
+}
+
+/* Where's Parker map */
+#map-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+#map-line {
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.3);
+    position: relative;
+}
+
+#map-line::after {
+    content: '✈️';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+}
+
+#nv-marker, #ga-marker {
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.4s ease;
+    opacity: 0.5;
+}
+
+#nv-marker.active, #ga-marker.active {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px currentColor;
 }
 
 /* Photo carousel */
