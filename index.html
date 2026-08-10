@@ -81,6 +81,18 @@
             <button onclick="startGame('tetris')">🧱 Tetris</button>
             <button onclick="startGame('frogger')">🐸 Frogger</button>
             <button class="close-btn" onclick="closeGame()">✕ Close</button>
+            <div id="high-scores">
+                <h3>🏆 High Scores</h3>
+                <div id="scores-list"></div>
+            </div>
+        </div>
+        
+        <!-- Name entry for high score -->
+        <div id="name-entry" style="display:none;">
+            <h3>New High Score! 🎉</h3>
+            <p id="name-entry-score"></p>
+            <input type="text" id="name-input" maxlength="3" placeholder="AAA" autocomplete="off">
+            <button onclick="saveHighScore()">Save</button>
         </div>
         <canvas id="game-canvas"></canvas>
         <div id="game-bar">
@@ -656,12 +668,73 @@
             gameMenu.style.display = 'block';
             gameCanvas.style.display = 'none';
             document.getElementById('game-bar').style.display = 'none';
-            gameScore.style.display = 'none';
             gameControls.style.display = 'none';
             currentGame = null;
             if (gameLoop) clearInterval(gameLoop);
             gameLoop = null;
+            showHighScores();
         }
+
+        // ═══════ HIGH SCORES ═══════
+        function getScores(game) {
+            try { return JSON.parse(localStorage.getItem('parker-hs-'+game)) || []; }
+            catch(e) { return []; }
+        }
+
+        function addScore(game, name, score) {
+            const scores = getScores(game);
+            scores.push({name: name.toUpperCase().slice(0,3), score});
+            scores.sort((a,b) => b.score - a.score);
+            scores.splice(10); // keep top 10
+            localStorage.setItem('parker-hs-'+game, JSON.stringify(scores));
+        }
+
+        function showHighScores() {
+            let html = '';
+            ['snake','tetris','frogger'].forEach(game => {
+                const scores = getScores(game);
+                const emoji = {snake:'🐍', tetris:'🧱', frogger:'🐸'}[game];
+                html += `<div class="hs-game">${emoji} ${game.charAt(0).toUpperCase()+game.slice(1)}</div>`;
+                if (scores.length === 0) {
+                    html += '<div class="hs-row"><span>---</span><span>---</span></div>';
+                } else {
+                    scores.slice(0,5).forEach((s,i) => {
+                        html += `<div class="hs-row"><span>${i+1}. ${s.name}</span><span>${s.score}</span></div>`;
+                    });
+                }
+            });
+            document.getElementById('scores-list').innerHTML = html;
+        }
+
+        function checkHighScore(game, score) {
+            const scores = getScores(game);
+            if (scores.length < 10 || score > scores[scores.length-1]?.score) {
+                // Show name entry
+                document.getElementById('name-entry').style.display = 'block';
+                document.getElementById('name-entry-score').textContent = `Score: ${score}`;
+                document.getElementById('name-input').value = '';
+                document.getElementById('name-input').dataset.game = game;
+                document.getElementById('name-input').dataset.score = score;
+                document.getElementById('name-input').focus();
+                return true;
+            }
+            return false;
+        }
+
+        function saveHighScore() {
+            const inp = document.getElementById('name-input');
+            const name = inp.value.trim() || 'AAA';
+            const game = inp.dataset.game;
+            const score = parseInt(inp.dataset.score);
+            addScore(game, name, score);
+            document.getElementById('name-entry').style.display = 'none';
+            backToMenu();
+        }
+
+        document.getElementById('name-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') saveHighScore();
+            e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        });
 
         // ═══════ SNAKE ═══════
         function initSnake() {
@@ -669,10 +742,10 @@
             gs.snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
             gs.dir = 'right'; gs.nextDir = 'right';
             gs.food = spawnSnakeFood();
-            gs.score = 0; gs.cellSize = 15;
-            gameScore.textContent = '🐍 Score: 0';
+            gs.score = 0; gs.cellSize = 15; gs.level = 1; gs.foodEaten = 0;
+            gameScore.textContent = '🐍 Lvl 1 — Score: 0';
             if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(snakeTick, 120);
+            gameLoop = setInterval(snakeTick, 140);
         }
 
         function spawnSnakeFood() {
@@ -699,13 +772,23 @@
             if (head.x<0 || head.x>=20 || head.y<0 || head.y>=20 ||
                 gs.snake.some(s => s.x===head.x && s.y===head.y)) {
                 gameScore.textContent = `🐍 Game Over! Score: ${gs.score}`;
-                clearInterval(gameLoop); gameLoop = null; return;
+                clearInterval(gameLoop); gameLoop = null;
+                setTimeout(() => checkHighScore('snake', gs.score), 300);
+                return;
             }
             
             gs.snake.unshift(head);
             if (head.x===gs.food.x && head.y===gs.food.y) {
-                gs.score += 10; gs.food = spawnSnakeFood();
-                gameScore.textContent = `🐍 Score: ${gs.score}`;
+                gs.score += 10 * gs.level; gs.foodEaten++;
+                gs.food = spawnSnakeFood();
+                // Level up every 5 foods — speed increases
+                if (gs.foodEaten % 5 === 0) {
+                    gs.level++;
+                    clearInterval(gameLoop);
+                    const newSpeed = Math.max(50, 140 - (gs.level-1)*15);
+                    gameLoop = setInterval(snakeTick, newSpeed);
+                }
+                gameScore.textContent = `🐍 Lvl ${gs.level} — Score: ${gs.score}`;
             } else { gs.snake.pop(); }
             
             drawSnake();
@@ -749,11 +832,11 @@
         function initTetris() {
             const gs = gameState;
             gs.board = Array(20).fill().map(()=>Array(10).fill(0));
-            gs.score = 0; gs.cellSize = 15;
+            gs.score = 0; gs.cellSize = 15; gs.level = 1; gs.lines = 0;
             spawnTetrisPiece();
-            gameScore.textContent = '🧱 Score: 0';
+            gameScore.textContent = '🧱 Lvl 1 — Score: 0';
             if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(tetrisTick, 400);
+            gameLoop = setInterval(tetrisTick, 500);
         }
 
         function spawnTetrisPiece() {
@@ -762,7 +845,11 @@
             gs.piece = TETRIS_PIECES[idx].map(r=>[...r]);
             gs.pieceColor = TETRIS_COLORS[idx];
             gs.px = 3; gs.py = 0;
-            if (collidesTetris()) { gameScore.textContent = `🧱 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; }
+            if (collidesTetris()) { 
+                gameScore.textContent = `🧱 Game Over! Score: ${gs.score}`; 
+                clearInterval(gameLoop); gameLoop=null;
+                setTimeout(() => checkHighScore('tetris', gs.score), 300);
+            }
         }
 
         function collidesTetris() {
@@ -799,7 +886,18 @@
             
             let cleared = 0;
             for (let y=19;y>=0;y--) if (gs.board[y].every(c=>c)) { gs.board.splice(y,1); gs.board.unshift(Array(10).fill(0)); cleared++; y++; }
-            if (cleared) { gs.score += cleared*100; gameScore.textContent = `🧱 Score: ${gs.score}`; }
+            if (cleared) { 
+                gs.lines += cleared;
+                gs.score += cleared * 100 * gs.level; 
+                // Level up every 10 lines
+                if (gs.lines >= gs.level * 10) {
+                    gs.level++;
+                    clearInterval(gameLoop);
+                    const newSpeed = Math.max(80, 500 - (gs.level-1)*50);
+                    gameLoop = setInterval(tetrisTick, newSpeed);
+                }
+                gameScore.textContent = `🧱 Lvl ${gs.level} — Score: ${gs.score}`; 
+            }
             spawnTetrisPiece();
         }
 
@@ -829,23 +927,44 @@
         // ═══════ FROGGER ═══════
         function initFrogger() {
             const gs = gameState;
-            gs.frog = {x:5,y:13}; gs.score = 0;
-            gs.lanes = [];
-            for (let y=1;y<13;y++) {
-                const speed = 0.5+Math.random()*1.5, dir = Math.random()>0.5?1:-1;
-                gs.lanes.push(Array(3).fill().map(()=>({x:Math.floor(Math.random()*15),y,speed,dir})));
-            }
-            gameScore.textContent = '🐸 Score: 0';
+            gs.frog = {x:5,y:13}; gs.score = 0; gs.level = 1; gs.trips = 0;
+            gs.lanes = buildFroggerLanes(1);
+            gameScore.textContent = '🐸 Lvl 1 — Score: 0';
             if (gameLoop) clearInterval(gameLoop);
             gameLoop = setInterval(froggerTick, 200);
+        }
+
+        function buildFroggerLanes(level) {
+            const lanes = [];
+            const numCars = Math.min(2 + level, 5);
+            for (let y=1;y<13;y++) {
+                const speed = 0.5 + Math.random()*1.5 + (level-1)*0.3;
+                const dir = Math.random()>0.5?1:-1;
+                lanes.push(Array(numCars).fill().map(()=>({x:Math.floor(Math.random()*15),y,speed,dir})));
+            }
+            return lanes;
         }
 
         function froggerInput(dir) {
             const gs = gameState, f = gs.frog;
             if (dir==='up') f.y--; if (dir==='down') f.y++;
             if (dir==='left') f.x--; if (dir==='right') f.x++;
-            if (f.x<0||f.x>=15||f.y<0||f.y>13) { gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; return; }
-            if (f.y===0) { gs.score+=100; gs.frog={x:5,y:13}; gameScore.textContent=`🐸 You made it! Score: ${gs.score}`; }
+            if (f.x<0||f.x>=15||f.y<0||f.y>13) { 
+                gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; 
+                clearInterval(gameLoop); gameLoop=null;
+                setTimeout(() => checkHighScore('frogger', gs.score), 300);
+                return; 
+            }
+            if (f.y===0) {
+                gs.trips++; gs.score += 100 * gs.level;
+                gs.frog = {x:5,y:13};
+                // Level up every 3 crossings
+                if (gs.trips % 3 === 0) {
+                    gs.level++;
+                    gs.lanes = buildFroggerLanes(gs.level);
+                }
+                gameScore.textContent = `🐸 Lvl ${gs.level} — Score: ${gs.score}`;
+            }
             drawFrogger();
         }
 
@@ -858,7 +977,10 @@
             // Check collision
             for (let lane of gs.lanes) for (let car of lane)
                 if (Math.abs(car.x-gs.frog.x)<0.8 && car.y===gs.frog.y) {
-                    gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; clearInterval(gameLoop); gameLoop=null; return;
+                    gameScore.textContent=`🐸 Game Over! Score: ${gs.score}`; 
+                    clearInterval(gameLoop); gameLoop=null;
+                    setTimeout(() => checkHighScore('frogger', gs.score), 300);
+                    return;
                 }
             drawFrogger();
         }
