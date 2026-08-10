@@ -595,6 +595,31 @@
             if (map[e.key]) { e.preventDefault(); handleGameInput(map[e.key]); }
         });
 
+        // SWIPE on game canvas
+        let touchStart = null;
+        gameCanvas.addEventListener('touchstart', e => {
+            touchStart = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+            e.preventDefault();
+        }, {passive: false});
+        gameCanvas.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+        gameCanvas.addEventListener('touchend', e => {
+            if (!touchStart || !currentGame) return;
+            const dx = e.changedTouches[0].clientX - touchStart.x;
+            const dy = e.changedTouches[0].clientY - touchStart.y;
+            if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return; // too small
+            if (Math.abs(dx) > Math.abs(dy)) {
+                handleGameInput(dx > 0 ? 'right' : 'left');
+            } else {
+                handleGameInput(dy > 0 ? 'down' : 'up');
+            }
+            touchStart = null;
+        });
+
+        // Click/tap on canvas = up (frogger jump)
+        gameCanvas.addEventListener('click', () => {
+            if (currentGame) handleGameInput('up');
+        });
+
         function handleGameInput(dir) {
             if (currentGame === 'snake') snakeInput(dir);
             if (currentGame === 'tetris') tetrisInput(dir);
